@@ -1,0 +1,2 @@
+export const STARTLOADING = 'STARTLOADING';
+export const ENDLOADING = 'ENDLOADING';
