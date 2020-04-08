@@ -8,30 +8,27 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
 import auth from '@react-native-firebase/auth';
-import {useNavigation} from '@react-navigation/native';
+import Header from '../../components/Header';
 function Login(props) {
-  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const FormrRegister = useFormik({
-    initialValues: {no_telephone: '', no_prefix: '62'},
+  const FormrVerify = useFormik({
+    initialValues: {code_verify: ''},
     validationSchema: Yup.object({
-      no_prefix: Yup.string()
-        .matches(/^[0-9]?()[0-9]$/, 'Invalid')
-        .required('Required'),
-      no_telephone: Yup.string()
-        .matches(/^(\d[0-9]{8,16})$/, 'Invalid Phone Number')
-        .required('Required No Telephone'),
+      code_verify: Yup.string()
+        .matches(/^([0-9]{6})$/, 'Invalid Code Verify')
+        .required('Required Code Verify'),
     }),
     onSubmit: async (values, form) => {
       dispatch(startLoading());
       try {
-        const confirmResult = await auth().signInWithPhoneNumber(
-          `+${values.no_prefix} ${values.no_telephone}`,
+        const confirmVerify = await props.route.params.confirmResult.confirm(
+          values.code_verify,
         );
-        if (confirmResult) {
-          navigation.navigate('Verify', {confirmResult});
+        console.log(confirmVerify);
+        if (confirmVerify) {
+          console.log('benar');
         } else {
-          throw new Error('Something Error');
+          console.log('salah');
         }
       } catch (err) {
         console.log(err);
@@ -42,31 +39,20 @@ function Login(props) {
 
   return (
     <View style={{flex: 1, backgroundColor: '#f1edee'}}>
-      <View style={style.container}>
-        <Text style={style.title}>Your Phone Number</Text>
-      </View>
+      <Header Title="Verify" />
       <View style={style.viewForm}>
         <ScrollView>
           <View>
             <View
               style={{
-                paddingLeft: 10,
-                paddingRight: 10,
+                paddingHorizontal: 30,
                 marginTop: 30,
               }}>
               <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                 <CustomInputText
-                  form={FormrRegister}
-                  name="no_prefix"
-                  leftIcon={<Icon name="plus" />}
-                  containerStyle={{width: 100, marginHorizontal: 0}}
-                  inputContainerStyle={style.input}
-                  inputStyle={style.inputText}
-                />
-                <CustomInputText
-                  form={FormrRegister}
-                  name="no_telephone"
-                  placeholder="Phone Number ..."
+                  form={FormrVerify}
+                  name="code_verify"
+                  placeholder="Code Verify ..."
                   containerStyle={style.inputContainer}
                   inputContainerStyle={style.input}
                   inputStyle={style.inputText}
@@ -74,36 +60,12 @@ function Login(props) {
               </View>
               <View>
                 <Button
-                  title="Next"
+                  title="Verify"
                   buttonStyle={style.login}
-                  onPress={FormrRegister.handleSubmit}
+                  onPress={FormrVerify.handleSubmit}
                 />
               </View>
             </View>
-          </View>
-          <View>
-            <Text style={style.quotes}> Or Login With</Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-            }}>
-            <Button
-              title="Facebook"
-              icon={<Icon name="facebook-f" size={15} color="white" />}
-              buttonStyle={style.anotherRegiser}
-              titleStyle={style.textButton}
-            />
-            <Button
-              title="Google+"
-              icon={<Icon name="google-plus-g" size={15} color="white" />}
-              buttonStyle={{
-                ...style.anotherRegiser,
-                backgroundColor: '#c63027',
-              }}
-              titleStyle={style.textButton}
-            />
           </View>
         </ScrollView>
       </View>
@@ -165,12 +127,6 @@ const style = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 10,
     color: '#525252',
-  },
-  quotes: {
-    textAlign: 'center',
-    marginTop: 25,
-    fontSize: 14,
-    color: '#4f4f4f',
   },
 });
 export default Login;

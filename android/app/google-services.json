@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1098811815971",
+    "firebase_url": "https://conchat-2851a.firebaseio.com",
+    "project_id": "conchat-2851a",
+    "storage_bucket": "conchat-2851a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098811815971:android:f1a75acd077ebaa31c9996",
+        "android_client_info": {
+          "package_name": "com.conchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1098811815971-tdn0c9smr69hd47lr1890nc88sbl6tpa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.conchat",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1098811815971-3hhoctb4jk8r6qmnkf19gamk88vttha1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4ELSNJCMvkqRaqcfmiBfcy8e9t-hBuT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1098811815971-3hhoctb4jk8r6qmnkf19gamk88vttha1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

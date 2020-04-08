@@ -1,9 +1,9 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import {View, Spinner, Text} from 'native-base';
-
+import {useSelector} from 'react-redux';
 export default function Loading(props) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const {isLoading} = useSelector((state) => state);
   return (
     <>
       {isLoading && (
@@ -23,7 +23,7 @@ const style = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,.09)',
+    backgroundColor: 'rgba(0,0,0,.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
