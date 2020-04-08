@@ -9,7 +9,9 @@ import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
 import auth from '@react-native-firebase/auth';
 import Header from '../../components/Header';
-function Login(props) {
+import {userLogin} from '../../store/actions/userData';
+import CustomAlert from '../../components/CustomAlert';
+function Verify(props) {
   const dispatch = useDispatch();
   const FormrVerify = useFormik({
     initialValues: {code_verify: ''},
@@ -26,12 +28,13 @@ function Login(props) {
         );
         console.log(confirmVerify);
         if (confirmVerify) {
-          console.log('benar');
+          dispatch(userLogin());
         } else {
-          console.log('salah');
+          CustomAlert(false, 'Wrong Verify Code');
         }
       } catch (err) {
         console.log(err);
+        CustomAlert(false, err.message || 'Wrong Verify Code');
       }
       dispatch(endLoading());
     },
@@ -61,7 +64,7 @@ function Login(props) {
               <View>
                 <Button
                   title="Verify"
-                  buttonStyle={style.login}
+                  buttonStyle={style.verify}
                   onPress={FormrVerify.handleSubmit}
                 />
               </View>
@@ -99,12 +102,13 @@ const style = StyleSheet.create({
     elevation: 4,
     marginHorizontal: 10,
   },
-  login: {
+  verify: {
     marginTop: 20,
     width: '100%',
     borderRadius: 18,
     backgroundColor: '#26a1c6',
     elevation: 4,
+    marginBottom: 20,
   },
   textButton: {
     fontSize: 14,
@@ -129,4 +133,4 @@ const style = StyleSheet.create({
     color: '#525252',
   },
 });
-export default Login;
+export default Verify;

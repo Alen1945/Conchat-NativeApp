@@ -9,6 +9,12 @@ import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
+import CustomAlert from '../../components/CustomAlert';
+import {YellowBox} from 'react-native';
+
+YellowBox.ignoreWarnings([
+  'Non-serializable values were found in the navigation state',
+]);
 function Login(props) {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -29,12 +35,16 @@ function Login(props) {
           `+${values.no_prefix} ${values.no_telephone}`,
         );
         if (confirmResult) {
+          navigation.setOptions({
+            confirmResult,
+          });
           navigation.navigate('Verify', {confirmResult});
         } else {
           throw new Error('Something Error');
         }
       } catch (err) {
-        console.log(err);
+        console.log(err.message);
+        CustomAlert(false, err.message || 'Something Error');
       }
       dispatch(endLoading());
     },
@@ -143,6 +153,7 @@ const style = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#26a1c6',
     elevation: 4,
+    marginBottom: 20,
   },
   textButton: {
     fontSize: 14,

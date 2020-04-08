@@ -1,3 +1,4 @@
 import {combineReducers} from 'redux';
 import isLoading from './loading';
-export default combineReducers({isLoading});
+import userData from './userData';
+export default combineReducers({isLoading, userData});
