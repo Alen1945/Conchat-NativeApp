@@ -3,7 +3,6 @@ import {View, Text, StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Main from './components/Main';
-
 function PrivateNavigation(props) {
   const Stack = createStackNavigator();
   return (
@@ -31,6 +30,9 @@ const style = StyleSheet.create({
     fontSize: 25,
     fontWeight: 'bold',
     color: '#444',
+  },
+  searchBar: {
+    padding: 0,
   },
 });
 export default PrivateNavigation;
