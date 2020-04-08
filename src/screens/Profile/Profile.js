@@ -22,7 +22,7 @@ export default function Profile(props) {
         />
         <View>
           <Text style={style.name}>Name</Text>
-          <Text style={style.email}>email</Text>
+          <Text style={style.email}>Bio</Text>
         </View>
       </View>
       <View style={style.line} />
@@ -43,18 +43,29 @@ export default function Profile(props) {
             </View>
           </TouchableOpacity>
           <View style={style.line} />
-          <Text style={{...style.titleBlock, marginTop: 15}}>Security</Text>
+          <Text style={{...style.titleBlock, marginTop: 15}}>App Theme</Text>
           <TouchableOpacity>
             <View style={{flexDirection: 'row', marginTop: 20}}>
               <Icon
                 reverse
-                name="ios-code"
-                type="ionicon"
+                name="paint-brush"
+                type="font-awesome"
                 color="grey"
                 size={15}
               />
-              <Text style={style.list}>Change Security Code</Text>
-              <Icons name="chevron-right" size={13} style={style.icons} />
+              <Text style={style.list}>Change Color Theme</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <View style={{flexDirection: 'row', marginTop: 20}}>
+              <Icon
+                reverse
+                name="cog"
+                type="font-awesome"
+                color="grey"
+                size={15}
+              />
+              <Text style={style.list}>Change Background</Text>
             </View>
           </TouchableOpacity>
           <View style={style.line} />
@@ -69,7 +80,6 @@ export default function Profile(props) {
                 size={15}
               />
               <Text style={style.list}>About us</Text>
-              <Icons name="chevron-right" size={13} style={style.icons} />
             </View>
           </TouchableOpacity>
           <View>
@@ -137,7 +147,7 @@ const style = StyleSheet.create({
     marginTop: 20,
     width: '100%',
     borderRadius: 18,
-    backgroundColor: '#53C9BE',
+    backgroundColor: '#26a1c6',
     paddingRight: 10,
     elevation: 4,
   },
