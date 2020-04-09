@@ -8,8 +8,11 @@ import {
 } from 'react-native';
 import {Icon, Avatar, Button} from 'react-native-elements';
 import Icons from 'react-native-vector-icons/FontAwesome';
-
+import {auth} from '../../config/firebase';
+import {useDispatch} from 'react-redux';
+import {userLogout} from '../../store/actions/userData';
 export default function Profile(props) {
+  const dispatch = useDispatch();
   return (
     <View style={{flex: 1, marginTop: 80}}>
       <View style={{alignSelf: 'center', alignItems: 'center'}}>
@@ -83,7 +86,14 @@ export default function Profile(props) {
             </View>
           </TouchableOpacity>
           <View>
-            <Button title="Log Out" buttonStyle={style.logout} />
+            <Button
+              title="Log Out"
+              buttonStyle={style.logout}
+              onPress={() => {
+                auth.signOut();
+                dispatch(userLogout());
+              }}
+            />
           </View>
         </View>
       </ScrollView>

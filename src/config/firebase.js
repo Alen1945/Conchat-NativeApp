@@ -1,27 +1,5 @@
-import firebase from '@react-native-firebase/app';
-import {
-  API_KEY,
-  AUTH_DOMAIN,
-  DATABASE_URL,
-  PROJECT_ID,
-  STORAGE_BUCKET,
-  MESSAGING_SENDER_ID,
-  APP_ID,
-  MEASUREMENT_ID,
-} from 'react-native-dotenv';
-const firebaseConfig = {
-  apiKey: API_KEY,
-  authDomain: AUTH_DOMAIN,
-  databaseURL: DATABASE_URL,
-  projectId: PROJECT_ID,
-  storageBucket: STORAGE_BUCKET,
-  messagingSenderId: MESSAGING_SENDER_ID,
-  appId: APP_ID,
-  measurementId: MEASUREMENT_ID,
-};
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const db = app.database();
-const auth = app.auth();
-const storage = app.storage();
-export {db, auth, storage};
+import Auth from '@react-native-firebase/auth';
+import Database from '@react-native-firebase/database';
+const auth = Auth();
+const db = Database();
+export {auth, db};

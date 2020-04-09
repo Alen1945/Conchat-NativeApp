@@ -7,7 +7,7 @@ import {startLoading, endLoading} from '../../store/actions/loading';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
-import auth from '@react-native-firebase/auth';
+import {auth} from '../../config/firebase';
 import {useNavigation} from '@react-navigation/native';
 import CustomAlert from '../../components/CustomAlert';
 import {YellowBox} from 'react-native';
@@ -31,7 +31,7 @@ function Login(props) {
     onSubmit: async (values, form) => {
       dispatch(startLoading());
       try {
-        const confirmResult = await auth().signInWithPhoneNumber(
+        const confirmResult = await auth.signInWithPhoneNumber(
           `+${values.no_prefix} ${values.no_telephone}`,
         );
         if (confirmResult) {
@@ -43,7 +43,7 @@ function Login(props) {
           throw new Error('Something Error');
         }
       } catch (err) {
-        console.log(err.message);
+        console.log(err.message || err);
         CustomAlert(false, err.message || 'Something Error');
       }
       dispatch(endLoading());

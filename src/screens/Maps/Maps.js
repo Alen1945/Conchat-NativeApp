@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, PermissionsAndroid} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import geolocation from '@react-native-community/geolocation';
 import {Toast} from 'native-base';
@@ -14,7 +14,9 @@ export default function Maps(props) {
         }
       },
       (err) => {
-        if (err.code === 2) {
+        if (err.code === 1) {
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+        } else if (err.code === 2) {
           Toast.show({
             text: 'Please active your Location',
             buttonText: 'Ok',
@@ -35,7 +37,7 @@ export default function Maps(props) {
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        initialRegion={{
+        region={{
           latitude: currentPosition
             ? currentPosition.latitude
             : -6.8205799999999995,
