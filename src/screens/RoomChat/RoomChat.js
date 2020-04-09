@@ -1,46 +1,65 @@
 import React from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import {Button, Input} from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import * as Yup from 'yup';
-import auth from '@react-native-firebase/auth';
+import {db, auth} from '../../config/firebase';
 import Header from '../../components/Header';
 import CustomAlert from '../../components/CustomAlert';
 import {GiftedChat} from 'react-native-gifted-chat';
 
 export default function RoomChat(props) {
-  const messages = [
-    {
-      _id: 1,
-      text: 'Hello developer',
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-    },
-    {
-      _id: 2,
-      text: 'Hello developer',
-      createdAt: new Date(),
-      user: {
-        _id: 1,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-    },
-  ];
+  const {idRoom, titleRoom, iconRoom} = props.route.params;
+  const [messages, setMessages] = React.useState([]);
+  const onSendMessage = (sendMessage) => {
+    db.ref(`/RoomChat/${idRoom}`).update({
+      lastMessage: sendMessage[0].text,
+      lastAddedMessage: `${sendMessage[0].createdAt}`,
+    });
+    db.ref(`/RoomMessage/${idRoom}/${sendMessage[0]._id}`).set({
+      user: sendMessage[0].user._id,
+      text: sendMessage[0].text,
+      createdAt: `${sendMessage[0].createdAt}`,
+    });
+  };
+  React.useEffect(() => {
+    db.ref(`/RoomMessage/${idRoom}`).on('value', (result) => {
+      if (result) {
+        setMessages(
+          Object.values(result.val())
+            .map((message, i) => ({
+              _id: i,
+              text: message.text,
+              createdAt: new Date(message.createdAt),
+              user: {
+                _id: message.user,
+                name:
+                  auth.currentUser.uid === message.user
+                    ? auth.currentUser.displayName ||
+                      auth.currentUser.phoneNumber
+                    : titleRoom,
+                avatar:
+                  auth.currentUser.uid === message.user
+                    ? auth.currentUser.photoURL
+                    : iconRoom,
+              },
+            }))
+            .sort((a, b) => {
+              let adate = new Date(a.createdAt);
+              let bdate = new Date(b.createdAt);
+              return adate > bdate ? -1 : adate < bdate ? 1 : 0;
+            }),
+        );
+      }
+    });
+  }, [idRoom]);
   return (
-    <View style={{flex: 1, backgroundColor: '#f1edee'}}>
-      <Header Title={props.route.params.name} />
+    <>
       <GiftedChat
+        styles={{flex: 1}}
         messages={messages}
-        onSend={(messages) => this.onSend(messages)}
+        onSend={(sendMessage) => onSendMessage(sendMessage)}
         user={{
-          _id: 1,
+          _id: auth.currentUser.uid,
         }}
       />
-    </View>
+    </>
   );
 }

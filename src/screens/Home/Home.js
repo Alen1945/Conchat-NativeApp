@@ -37,32 +37,37 @@ export default function Home(props) {
     try {
       if (idListChat && idListChat.length > 0) {
         idListChat.forEach(async (v) => {
-          const room = await db.ref('/RoomChat/' + v).once('value');
-          const roomVal = room.val();
-          if (roomVal.type === 'DIRECT_MESSAGE') {
-            const idAnotherUser = roomVal.member.filter(
-              (v) => v !== auth.currentUser.uid,
-            )[0];
-            const anotherUser = await db
-              .ref(`/Users/${idAnotherUser}`)
-              .once('value');
-            if (anotherUser.val()) {
-              setListChat((prevState) => ({
-                ...prevState,
-                [room.key]: {
-                  ...roomVal,
-                  titleRoom:
-                    anotherUser.val().displayName ||
-                    anotherUser.val().phoneNumber,
-                  iconRoom: anotherUser.val().photoURL || '',
-                },
-              }));
+          db.ref('/RoomChat/' + v).on('value', async (room) => {
+            console.log(room);
+            const roomVal = room.val();
+            if (roomVal.type === 'DIRECT_MESSAGE') {
+              const idAnotherUser = roomVal.member.filter(
+                (v) => v !== auth.currentUser.uid,
+              )[0];
+              const anotherUser = await db
+                .ref(`/Users/${idAnotherUser}`)
+                .once('value');
+              if (anotherUser.val()) {
+                setListChat((prevState) => ({
+                  ...prevState,
+                  [room.key]: {
+                    ...roomVal,
+                    titleRoom:
+                      anotherUser.val().displayName ||
+                      anotherUser.val().phoneNumber,
+                    iconRoom: anotherUser.val().photoURL || '',
+                  },
+                }));
+              } else {
+                setListChat((prevState) => ({
+                  ...prevState,
+                  [room.key]: roomVal,
+                }));
+              }
             } else {
               setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
             }
-          } else {
-            setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
-          }
+          });
         });
       }
     } catch (err) {
@@ -89,7 +94,11 @@ export default function Home(props) {
                   avatar
                   button
                   onPress={() =>
-                    props.navigation.navigate('RoomChat', {idRoom: idRoom})
+                    props.navigation.navigate('RoomChat', {
+                      idRoom: idRoom,
+                      titleRoom: room.titleRoom,
+                      iconRoom: room.iconRoom,
+                    })
                   }>
                   <Left>
                     <Avatar
@@ -102,15 +111,17 @@ export default function Home(props) {
                   <Body>
                     <Text>{room.titleRoom}</Text>
                     <Text note>
-                      {room.lastMessage.substring(0, 15)}
-                      {room.lastMessage.length > 15 && '...'}
+                      {room.lastMessage && room.lastMessage.substring(0, 15)}
+                      {room.lastMessage &&
+                        room.lastMessage.length > 15 &&
+                        '...'}
                     </Text>
                   </Body>
                   <Right>
                     <Text note>
-                      {new Date(room.lastaddedMessage).getHours() +
+                      {new Date(room.lastAddedMessage).getHours() +
                         ':' +
-                        new Date(room.lastaddedMessage).getMinutes()}
+                        new Date(room.lastAddedMessage).getMinutes()}
                     </Text>
                   </Right>
                 </ListItem>
