@@ -1,5 +1,5 @@
 import React from 'react';
-import {View} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Home from '../../screens/Home/Home';
@@ -10,6 +10,9 @@ const Tab = createMaterialTopTabNavigator();
 export default function TopupNavigate() {
   return (
     <>
+      <View style={style.headerContainer}>
+        <Text style={style.headerTitle}>Conchat</Text>
+      </View>
       <Tab.Navigator
         tabBarOptions={{
           showIcon: true,
@@ -47,3 +50,18 @@ export default function TopupNavigate() {
     </>
   );
 }
+const style = StyleSheet.create({
+  headerContainer: {
+    padding: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  headerTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#444',
+  },
+  searchBar: {
+    padding: 0,
+  },
+});

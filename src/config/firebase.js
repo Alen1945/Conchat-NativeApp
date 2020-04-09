@@ -1,3 +1,4 @@
+import firebase from '@react-native-firebase/app';
 import Auth from '@react-native-firebase/auth';
 import Database from '@react-native-firebase/database';
 const auth = Auth();
