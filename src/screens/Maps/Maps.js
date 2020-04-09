@@ -8,15 +8,15 @@ export default function Maps(props) {
         provider={PROVIDER_GOOGLE} // remove if not using Google Maps
         style={styles.map}
         initialRegion={{
-          latitude: -6.876123,
-          longitude: 103.2923,
-          latitudeDelta: 0.00225,
-          longitudeDelta: 0.02521,
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.0121,
         }}>
         <Marker
           coordinate={{
-            latitude: -6.876123,
-            longitude: 103.2923,
+            latitude: 37.78825,
+            longitude: -122.4324,
           }}
         />
       </MapView>
