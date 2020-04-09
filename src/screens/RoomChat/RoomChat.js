@@ -9,7 +9,6 @@ import CustomAlert from '../../components/CustomAlert';
 import {GiftedChat} from 'react-native-gifted-chat';
 
 export default function RoomChat(props) {
-  console.log(props.route.params);
   const messages = [
     {
       _id: 1,

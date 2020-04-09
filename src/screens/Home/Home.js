@@ -23,11 +23,6 @@ export default function Home(props) {
   const [listChat, setListChat] = React.useState({});
   const getIdListChat = async () => {
     try {
-      db.ref('/')
-        .once('value')
-        .then((value) => {
-          console.log(value);
-        });
       const listIdRoom = await db
         .ref(`/Profiles/${auth.currentUser.uid}/listRoomChat`)
         .once('value');
@@ -45,11 +40,26 @@ export default function Home(props) {
           const room = await db.ref('/RoomChat/' + v).once('value');
           const roomVal = room.val();
           if (roomVal.type === 'DIRECT_MESSAGE') {
-            const anotherUser = roomVal.member.filter(
+            const idAnotherUser = roomVal.member.filter(
               (v) => v !== auth.currentUser.uid,
             )[0];
-
-            setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
+            const anotherUser = await db
+              .ref(`/Users/${idAnotherUser}`)
+              .once('value');
+            if (anotherUser.val()) {
+              setListChat((prevState) => ({
+                ...prevState,
+                [room.key]: {
+                  ...roomVal,
+                  titleRoom:
+                    anotherUser.val().displayName ||
+                    anotherUser.val().phoneNumber,
+                  iconRoom: anotherUser.val().photoURL || '',
+                },
+              }));
+            } else {
+              setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
+            }
           } else {
             setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
           }
@@ -83,14 +93,14 @@ export default function Home(props) {
                   }>
                   <Left>
                     <Avatar
-                      title="u"
+                      title="U"
                       size={50}
                       rounded
-                      source={require('../../assets/concha.png')}
+                      source={room.iconRoom && {uri: room.iconRoom}}
                     />
                   </Left>
                   <Body>
-                    <Text>Alen</Text>
+                    <Text>{room.titleRoom}</Text>
                     <Text note>
                       {room.lastMessage.substring(0, 15)}
                       {room.lastMessage.length > 15 && '...'}
