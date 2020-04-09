@@ -23,6 +23,11 @@ export default function Home(props) {
   const [listChat, setListChat] = React.useState({});
   const getIdListChat = async () => {
     try {
+      db.ref('/')
+        .once('value')
+        .then((value) => {
+          console.log(value);
+        });
       const listIdRoom = await db
         .ref(`/Profiles/${auth.currentUser.uid}/listRoomChat`)
         .once('value');

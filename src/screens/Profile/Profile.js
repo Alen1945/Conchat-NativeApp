@@ -90,7 +90,6 @@ export default function Profile(props) {
               title="Log Out"
               buttonStyle={style.logout}
               onPress={() => {
-                auth.signOut();
                 dispatch(userLogout());
               }}
             />

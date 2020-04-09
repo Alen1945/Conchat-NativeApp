@@ -7,7 +7,7 @@ import {startLoading, endLoading} from '../../store/actions/loading';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
-import auth from '@react-native-firebase/auth';
+import {db} from '../../config/firebase';
 import Header from '../../components/Header';
 import {userLogin} from '../../store/actions/userData';
 import CustomAlert from '../../components/CustomAlert';
@@ -26,9 +26,8 @@ function Verify(props) {
         const confirmVerify = await props.route.params.confirmResult.confirm(
           values.code_verify,
         );
-        console.log(confirmVerify);
         if (confirmVerify) {
-          dispatch(userLogin());
+          dispatch(userLogin(confirmVerify));
         } else {
           CustomAlert(false, 'Wrong Verify Code');
         }
