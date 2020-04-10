@@ -8,31 +8,37 @@ import {
 } from 'react-native';
 import {Icon, Avatar, Button} from 'react-native-elements';
 import Icons from 'react-native-vector-icons/FontAwesome';
-import {auth} from '../../config/firebase';
-import {useDispatch} from 'react-redux';
+import {auth, storage} from '../../config/firebase';
+import {useDispatch, useSelector} from 'react-redux';
 import {userLogout} from '../../store/actions/userData';
 export default function Profile(props) {
   const dispatch = useDispatch();
+  const {dataProfile} = useSelector((state) => state.userData);
   return (
     <View style={{flex: 1, marginTop: 80}}>
       <View style={{alignSelf: 'center', alignItems: 'center'}}>
         <Avatar
           rounded
           title="u"
-          source={require('../../assets/concha.png')}
+          source={
+            dataProfile.photoURL && {
+              uri: dataProfile.photoURL,
+            }
+          }
           size={100}
           containerStyle={style.avatar}
         />
         <View>
-          <Text style={style.name}>Name</Text>
-          <Text style={style.email}>Bio</Text>
+          <Text style={style.name}>{dataProfile.displayName}</Text>
+          <Text style={style.email}>{dataProfile.bio}</Text>
         </View>
       </View>
       <View style={style.line} />
       <ScrollView>
         <View style={style.block}>
           <Text style={{...style.titleBlock, marginTop: 15}}>Account</Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => props.navigation.navigate('UpdateProfile')}>
             <View style={{flexDirection: 'row', marginTop: 20}}>
               <Icon
                 reverse
