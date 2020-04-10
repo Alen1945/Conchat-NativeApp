@@ -59,6 +59,9 @@ function ProfileUpdate(props) {
           });
         if (dataUpdateUser.hasOwnProperty('photoURL')) {
           const ext = dataUpdateUser.photoURL.type.split('/')[1];
+          if (!['jpg', 'png', 'jpeg'].includes(ext)) {
+            throw new Error('File Must Be a Image');
+          }
           const updatePhoto = await storage
             .ref(`userPhoto/${auth.currentUser.uid}.${ext}`)
             .putFile(dataUpdateUser.photoURL.uri);
@@ -76,6 +79,9 @@ function ProfileUpdate(props) {
         ) {
           if (Object.keys(dataUpdateUser).length > 0) {
             await auth.currentUser.updateProfile(dataUpdateUser);
+            if (dataUpdateUser.email) {
+              await auth.currentUser.updateEmail(dataUpdateUser.email);
+            }
             resultUpdateUser = true;
           }
           if (Object.keys(dataUpdatateProfile).length > 0) {
@@ -99,7 +105,7 @@ function ProfileUpdate(props) {
   const handleChangePicture = () => {
     const options = {
       noData: true,
-      quality: 0.6,
+      quality: 0.55,
     };
     ImagePicker.showImagePicker(options, (response) => {
       if (response.uri) {

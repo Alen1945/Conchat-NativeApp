@@ -6,35 +6,32 @@ import {
 } from './actionTypes';
 import {db, auth} from '../../config/firebase';
 
-function getUserData(dataProfile) {
+function getUserData() {
   return {
-    displayName: dataProfile.displayName,
-    email: dataProfile.email,
-    emailVerified: dataProfile.emailVerified,
-    isAnonymous: dataProfile.isAnonymous,
+    displayName: auth.currentUser.displayName,
+    email: auth.currentUser.email,
+    emailVerified: auth.currentUser.emailVerified,
+    isAnonymous: auth.currentUser.isAnonymous,
     metadata: {
-      creationTime: dataProfile.metadata.creationTime,
-      lastSignInTime: dataProfile.metadata.lastSignInTime,
+      creationTime: auth.currentUser.metadata.creationTime,
+      lastSignInTime: auth.currentUser.metadata.lastSignInTime,
     },
-    phoneNumber: dataProfile.phoneNumber,
-    photoURL: dataProfile.photoURL,
+    phoneNumber: auth.currentUser.phoneNumber,
+    photoURL: auth.currentUser.photoURL,
     isLogin: true,
   };
 }
-function SyncUserData(dataProfile) {
-  if (!dataProfile) {
-    dataProfile = auth.currentUser;
-  }
-  db.ref(`/Users/${dataProfile.uid}`).set(getUserData(dataProfile));
+function SyncUserData() {
+  db.ref(`/Users/${auth.currentUser.uid}`).set(getUserData());
 }
-export const userLogin = (dataProfile) => (dispatch) => {
-  SyncUserData(dataProfile);
-  db.ref(`/Profiles/${dataProfile.uid}`)
+export const userLogin = () => (dispatch) => {
+  SyncUserData();
+  db.ref(`/Profiles/${auth.currentUser.uid}`)
     .once('value')
     .then((profile) =>
       dispatch({
         type: USER_LOGIN,
-        payload: {...getUserData(dataProfile), ...profile.val()},
+        payload: {...getUserData(), ...profile.val()},
       }),
     )
     .catch((err) => {
@@ -60,8 +57,8 @@ export const updateProfile = () => (dispatch) => {
     .once('value')
     .then((profile) =>
       dispatch({
-        type: USER_LOGIN,
-        payload: {...getUserData(auth.currentUser), ...profile.val()},
+        type: UPDATE_PROFILE,
+        payload: {...getUserData(), ...profile.val()},
       }),
     )
     .catch((err) => {

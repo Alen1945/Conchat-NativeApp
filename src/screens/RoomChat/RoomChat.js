@@ -4,7 +4,7 @@ import {db, auth} from '../../config/firebase';
 import Header from '../../components/Header';
 import CustomAlert from '../../components/CustomAlert';
 import {GiftedChat} from 'react-native-gifted-chat';
-
+import Icon from 'react-native-vector-icons/FontAwesome5';
 export default function RoomChat(props) {
   const {idRoom, titleRoom, iconRoom} = props.route.params;
   const [messages, setMessages] = React.useState([]);
@@ -59,6 +59,8 @@ export default function RoomChat(props) {
         user={{
           _id: auth.currentUser.uid,
         }}
+        alwaysShowSend={true}
+        renderActions={() => <Icon name="image" size={30} color="#000" />}
       />
     </>
   );

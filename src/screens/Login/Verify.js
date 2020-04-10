@@ -7,12 +7,13 @@ import {startLoading, endLoading} from '../../store/actions/loading';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
-import {db} from '../../config/firebase';
+import {auth} from '../../config/firebase';
 import Header from '../../components/Header';
 import {userLogin} from '../../store/actions/userData';
 import CustomAlert from '../../components/CustomAlert';
 function Verify(props) {
   const dispatch = useDispatch();
+  const [isNewUser, setIsNewUser] = React.useState(false);
   const FormrVerify = useFormik({
     initialValues: {code_verify: ''},
     validationSchema: Yup.object({
@@ -27,13 +28,37 @@ function Verify(props) {
           values.code_verify,
         );
         if (confirmVerify) {
-          dispatch(userLogin(confirmVerify));
+          if (confirmVerify.displayName) {
+            dispatch(userLogin());
+          } else {
+            setIsNewUser(true);
+          }
         } else {
           CustomAlert(false, 'Wrong Verify Code');
         }
       } catch (err) {
         console.log(err);
-        CustomAlert(false, err.message || 'Wrong Verify Code');
+        CustomAlert(false, 'Wrong Verify Code');
+      }
+      dispatch(endLoading());
+    },
+  });
+  const FormrUpdateName = useFormik({
+    initialValues: {displayName: ''},
+    validationSchema: Yup.object({
+      displayName: Yup.string()
+        .min(6, 'Name Must Have 6 character or more')
+        .required('Required Code Verify'),
+    }),
+    onSubmit: async (values, form) => {
+      dispatch(startLoading());
+      try {
+        await auth.currentUser.updateProfile(values);
+        setIsNewUser(false);
+        dispatch(userLogin());
+      } catch (err) {
+        console.log(err);
+        CustomAlert(false, err.message || 'Something Wrong');
       }
       dispatch(endLoading());
     },
@@ -41,36 +66,76 @@ function Verify(props) {
 
   return (
     <View style={{flex: 1, backgroundColor: '#f1edee'}}>
-      <Header Title="Verify" />
-      <View style={style.viewForm}>
-        <ScrollView>
-          <View>
-            <View
-              style={{
-                paddingHorizontal: 30,
-                marginTop: 30,
-              }}>
-              <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-                <CustomInputText
-                  form={FormrVerify}
-                  name="code_verify"
-                  placeholder="Code Verify ..."
-                  containerStyle={style.inputContainer}
-                  inputContainerStyle={style.input}
-                  inputStyle={style.inputText}
-                />
-              </View>
+      {!isNewUser && (
+        <>
+          <Header Title="Verify" />
+          <View style={style.viewForm}>
+            <ScrollView>
               <View>
-                <Button
-                  title="Verify"
-                  buttonStyle={style.verify}
-                  onPress={FormrVerify.handleSubmit}
-                />
+                <View
+                  style={{
+                    paddingHorizontal: 30,
+                    marginTop: 30,
+                  }}>
+                  <View
+                    style={{flexDirection: 'row', justifyContent: 'center'}}>
+                    <CustomInputText
+                      form={FormrVerify}
+                      name="code_verify"
+                      placeholder="Code Verify ..."
+                      containerStyle={style.inputContainer}
+                      inputContainerStyle={style.input}
+                      inputStyle={style.inputText}
+                    />
+                  </View>
+                  <View>
+                    <Button
+                      title="Verify"
+                      buttonStyle={style.verify}
+                      onPress={FormrVerify.handleSubmit}
+                    />
+                  </View>
+                </View>
               </View>
-            </View>
+            </ScrollView>
           </View>
-        </ScrollView>
-      </View>
+        </>
+      )}
+      {isNewUser && (
+        <>
+          <Header Title="Add Name" />
+          <View style={style.viewForm}>
+            <ScrollView>
+              <View>
+                <View
+                  style={{
+                    paddingHorizontal: 30,
+                    marginTop: 30,
+                  }}>
+                  <View
+                    style={{flexDirection: 'row', justifyContent: 'center'}}>
+                    <CustomInputText
+                      form={FormrUpdateName}
+                      name="displayName"
+                      placeholder="Your Name..."
+                      containerStyle={style.inputContainer}
+                      inputContainerStyle={style.input}
+                      inputStyle={style.inputText}
+                    />
+                  </View>
+                  <View>
+                    <Button
+                      title="Verify"
+                      buttonStyle={style.verify}
+                      onPress={FormrUpdateName.handleSubmit}
+                    />
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </>
+      )}
     </View>
   );
 }
