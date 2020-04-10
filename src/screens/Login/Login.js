@@ -11,6 +11,7 @@ import firebase from '@react-native-firebase/app';
 import {auth} from '../../config/firebase';
 import {useNavigation} from '@react-navigation/native';
 import CustomAlert from '../../components/CustomAlert';
+import {userLogin} from '../../store/actions/userData';
 import {YellowBox} from 'react-native';
 
 YellowBox.ignoreWarnings([
@@ -32,15 +33,7 @@ function Login(props) {
     onSubmit: async (values, form) => {
       dispatch(startLoading());
       try {
-        const confirmResult = await auth.signInWithPhoneNumber(
-          `+${values.no_prefix}${values.no_telephone}`,
-          true,
-        );
-        if (confirmResult) {
-          navigation.navigate('Verify', {confirmResult});
-        } else {
-          throw new Error('Something Error');
-        }
+        await authPhoneNumber(`+${values.no_prefix}${values.no_telephone}`);
       } catch (err) {
         console.log(err.message || err);
         CustomAlert(false, err.message || 'Something Error');
@@ -48,7 +41,29 @@ function Login(props) {
       dispatch(endLoading());
     },
   });
-
+  const authPhoneNumber = async (phoneNumber) => {
+    try {
+      const confirmResult = await auth.signInWithPhoneNumber(
+        phoneNumber,
+        false,
+      );
+      if (confirmResult) {
+        if (confirmResult._verificationId) {
+          navigation.navigate('Verify', {confirmResult});
+        } else {
+          if (auth.currentUser) {
+            await dispatch(userLogin());
+          } else {
+            await authPhoneNumber(phoneNumber);
+          }
+        }
+      } else {
+        throw new Error('Something Error');
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
   return (
     <View style={{flex: 1, backgroundColor: '#f1edee'}}>
       <View style={style.container}>

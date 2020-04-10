@@ -24,26 +24,28 @@ function getUserData() {
 function SyncUserData() {
   db.ref(`/Users/${auth.currentUser.uid}`).set(getUserData());
 }
-export const userLogin = () => (dispatch) => {
-  SyncUserData();
-  db.ref(`/Profiles/${auth.currentUser.uid}`)
+export const userLogin = () => async (dispatch) => {
+  await SyncUserData();
+  await db
+    .ref(`/Profiles/${auth.currentUser.uid}`)
     .once('value')
-    .then((profile) =>
-      dispatch({
-        type: USER_LOGIN,
-        payload: {...getUserData(), ...profile.val()},
-      }),
+    .then(
+      async (profile) =>
+        await dispatch({
+          type: USER_LOGIN,
+          payload: {...getUserData(), ...profile.val()},
+        }),
     )
     .catch((err) => {
       console.log(err);
     });
 };
-export const userLogout = () => (dispatch) => {
-  db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(false);
-  auth
+export const userLogout = () => async (dispatch) => {
+  await db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(false);
+  await auth
     .signOut()
-    .then(() => {
-      dispatch({
+    .then(async () => {
+      await dispatch({
         type: USER_LOGOUT,
       });
     })
@@ -51,15 +53,17 @@ export const userLogout = () => (dispatch) => {
       db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(true);
     });
 };
-export const updateProfile = () => (dispatch) => {
-  SyncUserData();
-  db.ref(`/Profiles/${auth.currentUser.uid}`)
+export const updateProfile = () => async (dispatch) => {
+  await SyncUserData();
+  await db
+    .ref(`/Profiles/${auth.currentUser.uid}`)
     .once('value')
-    .then((profile) =>
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: {...getUserData(), ...profile.val()},
-      }),
+    .then(
+      async (profile) =>
+        await dispatch({
+          type: UPDATE_PROFILE,
+          payload: {...getUserData(), ...profile.val()},
+        }),
     )
     .catch((err) => {
       console.log(err);

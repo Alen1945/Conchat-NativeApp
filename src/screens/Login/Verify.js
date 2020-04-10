@@ -29,7 +29,7 @@ function Verify(props) {
         );
         if (confirmVerify) {
           if (confirmVerify.displayName) {
-            dispatch(userLogin());
+            await dispatch(userLogin());
           } else {
             setIsNewUser(true);
           }
@@ -38,6 +38,7 @@ function Verify(props) {
         }
       } catch (err) {
         console.log(err);
+        console.log(err.message);
         CustomAlert(false, 'Wrong Verify Code');
       }
       dispatch(endLoading());
