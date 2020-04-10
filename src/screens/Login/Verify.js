@@ -54,7 +54,6 @@ function Verify(props) {
       dispatch(startLoading());
       try {
         await auth.currentUser.updateProfile(values);
-        setIsNewUser(false);
         dispatch(userLogin());
       } catch (err) {
         console.log(err);
@@ -125,7 +124,7 @@ function Verify(props) {
                   </View>
                   <View>
                     <Button
-                      title="Verify"
+                      title="Save"
                       buttonStyle={style.verify}
                       onPress={FormrUpdateName.handleSubmit}
                     />
