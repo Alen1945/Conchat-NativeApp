@@ -52,17 +52,18 @@ export const userLogin = () => async (dispatch) => {
   }
 };
 export const userLogout = () => async (dispatch) => {
-  await db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(false);
-  await auth
-    .signOut()
-    .then(async () => {
+  try {
+    const resultUpdate = await firebaseFunction.httpsCallable('updateUser')({
+      isOnline: false,
+    });
+    if (resultUpdate) {
       await dispatch({
         type: USER_LOGOUT,
       });
-    })
-    .catch((e) => {
-      db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(true);
-    });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 export const updateProfile = (data = {}) => async (dispatch) => {
   try {
