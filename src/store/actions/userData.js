@@ -36,6 +36,9 @@ function getUserData() {
 
 export const userLogin = () => async (dispatch) => {
   try {
+    await firebaseFunction.httpsCallable('updateUser')({
+      isOnline: true,
+    });
     const userData = await firestore
       .collection('Users')
       .doc(auth.currentUser.uid)
@@ -53,9 +56,8 @@ export const userLogin = () => async (dispatch) => {
 };
 export const userLogout = () => async (dispatch) => {
   try {
-    const resultUpdate = await firebaseFunction.httpsCallable('updateUser')({
-      isOnline: false,
-    });
+    const resultUpdate = await firebaseFunction.httpsCallable('userSignOut')();
+    console.log(resultUpdate);
     if (resultUpdate) {
       await dispatch({
         type: USER_LOGOUT,
@@ -75,7 +77,7 @@ export const updateProfile = (data = {}) => async (dispatch) => {
       console.log('resultUpdate', resultUpdate);
       await dispatch({
         type: UPDATE_PROFILE,
-        payload: resultUpdate,
+        payload: resultUpdate.data,
       });
     }
   } catch (err) {

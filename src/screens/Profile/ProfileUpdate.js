@@ -77,24 +77,16 @@ function ProfileUpdate(props) {
           Object.keys(dataUpdateUser).length > 0 ||
           Object.keys(dataUpdatateProfile).length > 0
         ) {
-          if (Object.keys(dataUpdateUser).length > 0) {
-            await auth.currentUser.updateProfile(dataUpdateUser);
-            if (dataUpdateUser.email) {
-              await auth.currentUser.updateEmail(dataUpdateUser.email);
-            }
-            resultUpdateUser = true;
+          await auth.currentUser.updateProfile(dataUpdateUser);
+          if (dataUpdateUser.email) {
+            await auth.currentUser.updateEmail(dataUpdateUser.email);
           }
           if (Object.keys(dataUpdatateProfile).length > 0) {
-            await db
-              .ref(`Profiles/${auth.currentUser.uid}`)
-              .update(dataUpdatateProfile);
-            resultUpdateProfile = true;
+            await dispatch(updateProfile(dataUpdatateProfile));
+          } else {
+            await dispatch(updateProfile());
           }
-          if (resultUpdateUser || resultUpdateProfile) {
-            console.log(auth.currentUser);
-            dispatch(updateProfile());
-            CustomAlert(true, 'Update Profile Success');
-          }
+          CustomAlert(true, 'Update Profile Success');
         }
       } catch (err) {
         console.log(err);
