@@ -19,14 +19,12 @@ function getUserData() {
     emailVerified: auth.currentUser.emailVerified || false,
     isAnonymous: auth.currentUser.isAnonymous || false,
     metadata: {
-      creationTime: new firebase.firestore.Timestamp(
-        new Date(auth.currentUser.metadata.creationTime).getTime() / 1000,
-        0,
-      ),
-      lastSignInTime: new firebase.firestore.Timestamp(
-        new Date(auth.currentUser.metadata.lastSignInTime).getTime() / 1000,
-        0,
-      ),
+      creationTime: new Date(
+        auth.currentUser.metadata.creationTime,
+      ).toUTCString(),
+      lastSignInTime: new Date(
+        auth.currentUser.metadata.lastSignInTime,
+      ).toUTCString(),
     },
     phoneNumber: auth.currentUser.phoneNumber,
     photoURL: auth.currentUser.photoURL || '',
@@ -56,7 +54,7 @@ export const userLogin = () => async (dispatch) => {
 };
 export const userLogout = () => async (dispatch) => {
   try {
-    const resultUpdate = await firebaseFunction.httpsCallable('userSignOut')();
+    const resultUpdate = firebaseFunction.httpsCallable('userSignOut')();
     console.log(resultUpdate);
     if (resultUpdate) {
       await dispatch({

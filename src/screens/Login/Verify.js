@@ -13,7 +13,7 @@ import {userLogin, updateProfile} from '../../store/actions/userData';
 import CustomAlert from '../../components/CustomAlert';
 function Verify(props) {
   const dispatch = useDispatch();
-  const [isNewUser, setIsNewUser] = React.useState(false);
+  const [isNewUser, setIsNewUser] = React.useState(props.route.params.addName);
   const FormrVerify = useFormik({
     initialValues: {code_verify: ''},
     validationSchema: Yup.object({

@@ -49,10 +49,14 @@ function Login(props) {
       );
       if (confirmResult) {
         if (confirmResult._verificationId) {
-          navigation.navigate('Verify', {confirmResult});
+          navigation.navigate('Verify', {confirmResult, addName: false});
         } else {
           if (auth.currentUser) {
-            await dispatch(userLogin());
+            if (auth.currentUser.displayName) {
+              await dispatch(userLogin());
+            } else {
+              navigation.navigate('Verify', {confirmResult, addName: true});
+            }
           } else {
             await authPhoneNumber(phoneNumber);
           }
