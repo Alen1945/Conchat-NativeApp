@@ -1,7 +1,12 @@
+import firebase from '@react-native-firebase/app';
 import Storage from '@react-native-firebase/storage';
 import Auth from '@react-native-firebase/auth';
 import Database from '@react-native-firebase/database';
+import Firestore from '@react-native-firebase/firestore';
+import FirebaseFunction from '@react-native-firebase/functions';
 const auth = Auth();
 const db = Database();
 const storage = Storage();
-export {auth, db, storage};
+const firestore = Firestore();
+const firebaseFunction = FirebaseFunction();
+export {auth, db, storage, firestore, firebaseFunction, firebase};

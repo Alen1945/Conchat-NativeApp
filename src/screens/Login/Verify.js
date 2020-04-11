@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
 import {auth} from '../../config/firebase';
 import Header from '../../components/Header';
-import {userLogin} from '../../store/actions/userData';
+import {userLogin, updateProfile} from '../../store/actions/userData';
 import CustomAlert from '../../components/CustomAlert';
 function Verify(props) {
   const dispatch = useDispatch();
@@ -28,6 +28,7 @@ function Verify(props) {
           values.code_verify,
         );
         if (confirmVerify) {
+          console.log(confirmVerify);
           if (confirmVerify.displayName) {
             await dispatch(userLogin());
           } else {
@@ -55,7 +56,8 @@ function Verify(props) {
       dispatch(startLoading());
       try {
         await auth.currentUser.updateProfile(values);
-        dispatch(userLogin());
+        await dispatch(updateProfile());
+        await dispatch(userLogin());
       } catch (err) {
         console.log(err);
         CustomAlert(false, err.message || 'Something Wrong');

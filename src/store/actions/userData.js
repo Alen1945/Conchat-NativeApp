@@ -4,41 +4,52 @@ import {
   UPDATE_PROFILE,
   USER_CHANGE_PASSWORD,
 } from './actionTypes';
-import {db, auth} from '../../config/firebase';
+import {
+  db,
+  auth,
+  firestore,
+  firebaseFunction,
+  firebase,
+} from '../../config/firebase';
 
 function getUserData() {
   return {
-    displayName: auth.currentUser.displayName,
-    email: auth.currentUser.email,
-    emailVerified: auth.currentUser.emailVerified,
-    isAnonymous: auth.currentUser.isAnonymous,
+    displayName: auth.currentUser.displayName || '',
+    email: auth.currentUser.email || '',
+    emailVerified: auth.currentUser.emailVerified || false,
+    isAnonymous: auth.currentUser.isAnonymous || false,
     metadata: {
-      creationTime: auth.currentUser.metadata.creationTime,
-      lastSignInTime: auth.currentUser.metadata.lastSignInTime,
+      creationTime: new firebase.firestore.Timestamp(
+        new Date(auth.currentUser.metadata.creationTime).getTime() / 1000,
+        0,
+      ),
+      lastSignInTime: new firebase.firestore.Timestamp(
+        new Date(auth.currentUser.metadata.lastSignInTime).getTime() / 1000,
+        0,
+      ),
     },
     phoneNumber: auth.currentUser.phoneNumber,
-    photoURL: auth.currentUser.photoURL,
-    isLogin: true,
+    photoURL: auth.currentUser.photoURL || '',
+    isOnline: true,
   };
 }
-function SyncUserData() {
-  db.ref(`/Users/${auth.currentUser.uid}`).set(getUserData());
-}
+
 export const userLogin = () => async (dispatch) => {
-  await SyncUserData();
-  await db
-    .ref(`/Profiles/${auth.currentUser.uid}`)
-    .once('value')
-    .then(
-      async (profile) =>
-        await dispatch({
-          type: USER_LOGIN,
-          payload: {...getUserData(), ...profile.val()},
-        }),
-    )
-    .catch((err) => {
-      console.log(err);
-    });
+  try {
+    const userData = await firestore
+      .collection('Users')
+      .doc(auth.currentUser.uid)
+      .get();
+    if (userData.data()) {
+      console.log(userData.data());
+      await dispatch({
+        type: USER_LOGIN,
+        payload: userData.data(),
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 export const userLogout = () => async (dispatch) => {
   await db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(false);
@@ -53,19 +64,20 @@ export const userLogout = () => async (dispatch) => {
       db.ref(`/Users/${auth.currentUser.uid}/isLogin`).set(true);
     });
 };
-export const updateProfile = () => async (dispatch) => {
-  await SyncUserData();
-  await db
-    .ref(`/Profiles/${auth.currentUser.uid}`)
-    .once('value')
-    .then(
-      async (profile) =>
-        await dispatch({
-          type: UPDATE_PROFILE,
-          payload: {...getUserData(), ...profile.val()},
-        }),
-    )
-    .catch((err) => {
-      console.log(err);
+export const updateProfile = (data = {}) => async (dispatch) => {
+  try {
+    const resultUpdate = await firebaseFunction.httpsCallable('updateUser')({
+      ...getUserData(),
+      ...data,
     });
+    if (resultUpdate) {
+      console.log('resultUpdate', resultUpdate);
+      await dispatch({
+        type: UPDATE_PROFILE,
+        payload: resultUpdate,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
