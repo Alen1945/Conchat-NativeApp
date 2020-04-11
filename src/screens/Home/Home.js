@@ -20,12 +20,15 @@ export default function Home(props) {
   const [listContact, setListContact] = React.useState([]);
   const getIdListChat = async () => {
     try {
-      const listIdRoom = await db
-        .ref(`/Profiles/${auth.currentUser.uid}/listRoomChat`)
-        .once('value');
-      if (listIdRoom.val() && listIdRoom.val().length > 0) {
-        setIdListChat(listIdRoom.val());
-      }
+      firestore
+        .collection('Users')
+        .doc(`${auth.currentUser.uid}`)
+        .collection('ListChat')
+        .onSnapshot((snapshot) => {
+          setIdListChat(
+            snapshot.docs.reduce((list, data) => [...list, data.data().id], []),
+          );
+        });
     } catch (err) {
       console.log(err);
     }
@@ -34,37 +37,39 @@ export default function Home(props) {
     try {
       if (idListChat && idListChat.length > 0) {
         idListChat.forEach(async (v) => {
-          db.ref('/RoomChat/' + v).on('value', async (room) => {
-            console.log(room);
-            const roomVal = room.val();
-            if (roomVal.type === 'DIRECT_MESSAGE') {
-              const idAnotherUser = roomVal.member.filter(
-                (v) => v !== auth.currentUser.uid,
-              )[0];
-              const anotherUser = await db
-                .ref(`/Users/${idAnotherUser}`)
-                .once('value');
-              if (anotherUser.val()) {
-                setListChat((prevState) => ({
-                  ...prevState,
-                  [room.key]: {
-                    ...roomVal,
-                    titleRoom:
-                      anotherUser.val().displayName ||
-                      anotherUser.val().phoneNumber,
-                    iconRoom: anotherUser.val().photoURL || '',
-                  },
-                }));
+          firestore
+            .collection('RoomChat')
+            .doc(v)
+            .onSnapshot(async (snapshot) => {
+              const snapData = snapshot.data();
+              if (snapData.type === 'DIRECT_MESSAGE') {
+                const idAnotherUser = Object.keys(snapData.member).filter(
+                  (v) => v !== auth.currentUser.uid,
+                )[0];
+                await firestore
+                  .collection('Users')
+                  .doc(idAnotherUser)
+                  .onSnapshot((data) => {
+                    const dataVal = data.data();
+                    if (dataVal) {
+                      setListChat((prevState) => ({
+                        ...prevState,
+                        [snapData.id]: {
+                          ...snapData,
+                          titleRoom: dataVal.displayName || dataVal.phoneNumber,
+                          secondUser: idAnotherUser,
+                          iconRoom: dataVal.photoURL || '',
+                        },
+                      }));
+                    }
+                  });
               } else {
                 setListChat((prevState) => ({
                   ...prevState,
-                  [room.key]: roomVal,
+                  [snapData.id]: snapData,
                 }));
               }
-            } else {
-              setListChat((prevState) => ({...prevState, [room.key]: roomVal}));
-            }
-          });
+            });
         });
       }
     } catch (err) {
@@ -121,6 +126,7 @@ export default function Home(props) {
                       props.navigation.navigate('RoomChat', {
                         idRoom: idRoom,
                         titleRoom: room.titleRoom,
+                        secondUser: room.secondUser,
                         iconRoom: room.iconRoom,
                       })
                     }>
@@ -161,58 +167,77 @@ export default function Home(props) {
           </TouchableOpacity>
         </View>
       </Container>
-      <Overlay
-        isVisible={isVisibleOverlay}
-        overlayBackgroundColor="#fff"
-        overlayStyle={{
-          height: '100%',
-          width: '100%',
-        }}
-        width="auto"
-        height="auto">
-        <View style={{flex: 1, position: 'relative'}}>
-          <TouchableOpacity
-            style={{position: 'absolute', top: 0, left: 10}}
-            onPress={() => setIsVisibleOverlay(false)}>
-            <Icon name="times" size={27} color="#666" />
-          </TouchableOpacity>
-          <Text style={style.headingSearch}>Select User</Text>
-          <Input
-            placeholder="name"
-            onChangeText={(text) => handleSearchContact(text)}
-            inputContainerStyle={{...style.input}}
-            inputStyle={style.inputText}
-          />
-          {Object.values(listContact).length > 0 && (
-            <Content
-              style={{
-                marginTop: 20,
-              }}>
-              <List style={{paddingRight: 30}}>
-                {Object.values(listContact).map((user, i) => (
-                  <ListItem key={i} avatar button style={{marginVertical: 6}}>
-                    <Left>
-                      <Avatar
-                        title="U"
-                        size={50}
-                        rounded
-                        source={{uri: user.photoURL}}
-                      />
-                    </Left>
-                    <Body>
-                      <Text>{user.displayName}</Text>
-                      <Text note>{user.phoneNumber}</Text>
-                    </Body>
-                    <Right>
-                      <Text note>{user.isOnline ? 'Online' : 'Offline'}</Text>
-                    </Right>
-                  </ListItem>
-                ))}
-              </List>
-            </Content>
-          )}
+      {isVisibleOverlay && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingTop: 20,
+            backgroundColor: '#fff',
+          }}>
+          <View style={{flex: 1, position: 'relative'}}>
+            <TouchableOpacity
+              style={{position: 'absolute', top: 0, left: 10}}
+              onPress={() => setIsVisibleOverlay(false)}>
+              <Icon name="times" size={27} color="#666" />
+            </TouchableOpacity>
+            <Text style={style.headingSearch}>Select User</Text>
+            <Input
+              placeholder="name"
+              onChangeText={(text) => handleSearchContact(text)}
+              inputContainerStyle={{...style.input}}
+              inputStyle={style.inputText}
+            />
+            {Object.values(listContact).length > 0 && (
+              <Content
+                style={{
+                  marginTop: 20,
+                }}>
+                <List style={{paddingRight: 30}}>
+                  {Object.keys(listContact).map((key, i) => {
+                    const user = listContact[key];
+                    return (
+                      <ListItem
+                        key={i}
+                        avatar
+                        button
+                        style={{marginVertical: 6}}
+                        onPress={() =>
+                          props.navigation.navigate('RoomChat', {
+                            titleRoom: user.displayName,
+                            iconRoom: user.photoURL,
+                            secondUser: key,
+                          })
+                        }>
+                        <Left>
+                          <Avatar
+                            title="U"
+                            size={50}
+                            rounded
+                            source={{uri: user.photoURL}}
+                          />
+                        </Left>
+                        <Body>
+                          <Text>{user.displayName}</Text>
+                          <Text note>{user.phoneNumber}</Text>
+                        </Body>
+                        <Right>
+                          <Text note>
+                            {user.isOnline ? 'Online' : 'Offline'}
+                          </Text>
+                        </Right>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </Content>
+            )}
+          </View>
         </View>
-      </Overlay>
+      )}
     </>
   );
 }
