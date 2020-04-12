@@ -4,6 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import Main from './components/Main';
 import RoomChat from '../screens/RoomChat/RoomChat';
 import UpdateProfile from '../screens/Profile/ProfileUpdate';
+import UserProfile from '../screens/Profile/UserProfile';
 function PrivateNavigation(props) {
   const Stack = createStackNavigator();
   return (
@@ -16,6 +17,7 @@ function PrivateNavigation(props) {
           <Stack.Screen name="Main" component={Main} />
           <Stack.Screen name="RoomChat" component={RoomChat} />
           <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+          <Stack.Screen name="UserProfile" component={UserProfile} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

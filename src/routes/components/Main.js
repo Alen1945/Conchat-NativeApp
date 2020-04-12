@@ -38,13 +38,6 @@ export default function TopupNavigate() {
             title: 'Chat',
           }}
         />
-        <Tab.Screen
-          name="Maps"
-          component={Maps}
-          options={{
-            title: 'Nearby',
-          }}
-        />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
     </>

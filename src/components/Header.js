@@ -6,7 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 export default function Header(props) {
   const navigation = useNavigation();
   return (
-    <View style={{flex: 2, paddingBottom: 20}}>
+    <View style={{paddingBottom: 20}}>
       <TouchableOpacity
         style={{width: 50, marginTop: 25}}
         onPress={navigation.goBack}>

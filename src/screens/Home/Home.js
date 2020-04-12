@@ -14,7 +14,6 @@ import {Avatar, Overlay, Input} from 'react-native-elements';
 import {auth, db, firestore} from '../../config/firebase';
 import Icon from 'react-native-vector-icons/FontAwesome';
 export default function Home(props) {
-  const [idListChat, setIdListChat] = React.useState([]);
   const [listChat, setListChat] = React.useState({});
   const [isVisibleOverlay, setIsVisibleOverlay] = React.useState(false);
   const [listContact, setListContact] = React.useState([]);
@@ -35,15 +34,15 @@ export default function Home(props) {
   };
   const getListChat = async () => {
     try {
-      if (idListChat && idListChat.length > 0) {
-        idListChat.forEach(async (v) => {
-          firestore
-            .collection('RoomChat')
-            .doc(v)
-            .onSnapshot(async (snapshot) => {
-              const snapData = snapshot.data();
-              if (snapData.type === 'DIRECT_MESSAGE') {
-                const idAnotherUser = Object.keys(snapData.member).filter(
+      await firestore
+        .collection('RoomChat')
+        .where(`member.${auth.currentUser.uid}`, '==', true)
+        .onSnapshot((rooms) => {
+          if (rooms) {
+            rooms.docs.forEach(async (room) => {
+              const roomData = room.data();
+              if (roomData.type === 'DIRECT_MESSAGE') {
+                const idAnotherUser = Object.keys(roomData.member).filter(
                   (v) => v !== auth.currentUser.uid,
                 )[0];
                 await firestore
@@ -54,8 +53,8 @@ export default function Home(props) {
                     if (dataVal) {
                       setListChat((prevState) => ({
                         ...prevState,
-                        [snapData.id]: {
-                          ...snapData,
+                        [room.id]: {
+                          ...roomData,
                           titleRoom: dataVal.displayName || dataVal.phoneNumber,
                           secondUser: idAnotherUser,
                           iconRoom: dataVal.photoURL || '',
@@ -66,12 +65,12 @@ export default function Home(props) {
               } else {
                 setListChat((prevState) => ({
                   ...prevState,
-                  [snapData.id]: snapData,
+                  [room.id]: roomData,
                 }));
               }
             });
+          }
         });
-      }
     } catch (err) {
       console.log(err);
     }
@@ -102,13 +101,10 @@ export default function Home(props) {
     }
   };
   React.useEffect(() => {
-    getIdListChat();
+    getListChat();
     handleSearchContact();
   }, []);
 
-  React.useEffect(() => {
-    getListChat();
-  }, [idListChat]);
   return (
     <>
       <Container>
@@ -214,10 +210,10 @@ export default function Home(props) {
                         }>
                         <Left>
                           <Avatar
-                            title="U"
                             size={50}
                             rounded
-                            source={{uri: user.photoURL}}
+                            source={user.photoURL && {uri: user.photoURL}}
+                            title="U"
                           />
                         </Left>
                         <Body>
