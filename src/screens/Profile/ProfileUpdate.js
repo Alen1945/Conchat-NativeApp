@@ -18,7 +18,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {updateProfile} from '../../store/actions/userData';
 import {startLoading, endLoading} from '../../store/actions/loading';
 import ImagePicker from 'react-native-image-picker';
-import {auth, storage, db} from '../../config/firebase';
+import {auth, storage} from '../../config/firebase';
 function ProfileUpdate(props) {
   const [srcImageUpdate, setSrcImageUpdate] = React.useState('');
   const {dataProfile} = useSelector((state) => state.userData);
@@ -111,9 +111,9 @@ function ProfileUpdate(props) {
       <View
         style={{
           flex: 1,
-          backgroundColor: '#53C9BE',
+          backgroundColor: '#26a1c6',
           flexDirection: 'row',
-          marginBottom: -150,
+          marginBottom: -140,
         }}>
         <TouchableOpacity
           style={{width: 50, marginTop: 25}}
@@ -126,7 +126,7 @@ function ProfileUpdate(props) {
       <View
         style={{
           flex: 2,
-          backgroundColor: '#53C9BE',
+          backgroundColor: '#26a1c6',
           alignItems: 'center',
           marginTop: 110,
           marginBottom: 40,
@@ -257,7 +257,7 @@ const style = StyleSheet.create({
     marginBottom: 60,
     width: '75%',
     borderRadius: 10,
-    backgroundColor: '#53C9BE',
+    backgroundColor: '#26a1c6',
     elevation: 4,
     alignSelf: 'center',
   },

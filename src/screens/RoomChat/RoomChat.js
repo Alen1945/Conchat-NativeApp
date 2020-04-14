@@ -6,17 +6,24 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import {db, auth, firebaseFunction, firestore} from '../../config/firebase';
+import {auth, firebaseFunction, firestore} from '../../config/firebase';
 import Header from '../../components/Header';
 import CustomAlert from '../../components/CustomAlert';
 import {GiftedChat, Send, Actions, Bubble} from 'react-native-gifted-chat';
+import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import {useNavigation} from '@react-navigation/native';
+import {useSelector, useDispatch} from 'react-redux';
+import {addDataChat} from '../../store/actions/chatData';
 export default function RoomChat(props) {
+  const dispatch = useDispatch();
   const {titleRoom, iconRoom} = props.route.params;
-  const [idRoom, setIdRoom] = React.useState(props.route.idRoom);
-  const [messages, setMessages] = React.useState([]);
+  const [idRoom, setIdRoom] = React.useState(props.route.params.idRoom);
+  const messages = useSelector((state) =>
+    idRoom ? state.chatData[idRoom] : [],
+  );
   const [isVisibleAttach, setIsVisibleAttach] = React.useState(false);
+  const navigation = useNavigation();
   const onSendMessage = async (sendMessage) => {
     try {
       firebaseFunction.httpsCallable('createMessage')({
@@ -39,25 +46,29 @@ export default function RoomChat(props) {
         .collection('messages')
         .orderBy('createdAt', 'desc')
         .onSnapshot((snapshot) => {
-          setMessages(
-            snapshot.docs.map((message) => ({
-              _id: message.id,
-              text: message.data().text,
-              createdAt: new Date(message.data().createdAt),
-              location: 'alen',
-              user: {
-                _id: message.data().user,
-                name:
-                  auth.currentUser.uid === message.data().user
-                    ? auth.currentUser.displayName ||
-                      auth.currentUser.phoneNumber
-                    : titleRoom,
-                avatar:
-                  auth.currentUser.uid === message.data().user
-                    ? auth.currentUser.photoURL
-                    : iconRoom,
-              },
-            })),
+          dispatch(
+            addDataChat({
+              idRoom,
+              messages: snapshot.docs.map((message) => ({
+                _id: message.id,
+                text: message.data().text,
+                image: message.data().image || '',
+                createdAt: new Date(message.data().createdAt),
+                location: message.data().location || '',
+                user: {
+                  _id: message.data().user,
+                  name:
+                    auth.currentUser.uid === message.data().user
+                      ? auth.currentUser.displayName ||
+                        auth.currentUser.phoneNumber
+                      : titleRoom,
+                  avatar:
+                    auth.currentUser.uid === message.data().user
+                      ? auth.currentUser.photoURL
+                      : iconRoom,
+                },
+              })),
+            }),
           );
         });
     } else {
@@ -117,28 +128,46 @@ export default function RoomChat(props) {
                 backgroundColor: 'white',
               },
             }}
-            // renderCustomView={(props) => {
-            //   if (props.currentMessage.location) {
-            //     return (
-            //       <Text>alen</Text>
-            //       // <TouchableOpacity
-            //       //   style={[styles.container, containerStyle]}
-            //       //   onPress={this.openMapAsync}>
-            //       //   <MapView
-            //       //     style={[styles.mapView, mapViewStyle]}
-            //       //     region={{
-            //       //       latitude: currentMessage.location.latitude,
-            //       //       longitude: currentMessage.location.longitude,
-            //       //       latitudeDelta: 0.0922,
-            //       //       longitudeDelta: 0.0421,
-            //       //     }}
-            //       //     scrollEnabled={false}
-            //       //     zoomEnabled={false}
-            //       //   />
-            //       // </TouchableOpacity>
-            //     );
-            //   }
-            // }}
+            renderCustomView={(props) => {
+              if (props.currentMessage.location) {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate('Maps', {
+                        user: props.currentMessage.user,
+                        location: props.currentMessage.location,
+                      });
+                    }}>
+                    <View
+                      style={{
+                        height: 150,
+                        width: 150,
+                      }}>
+                      <MapView
+                        style={{
+                          height: '100%',
+                          width: '100%',
+                        }}
+                        region={{
+                          latitude: props.currentMessage.location.latitude,
+                          longitude: props.currentMessage.location.longitude,
+                          latitudeDelta: 0.0922,
+                          longitudeDelta: 0.0421,
+                        }}
+                        scrollEnabled={false}
+                        zoomEnabled={false}>
+                        <Marker
+                          coordinate={{
+                            latitude: props.currentMessage.location.latitude,
+                            longitude: props.currentMessage.location.longitude,
+                          }}
+                        />
+                      </MapView>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }
+            }}
             renderSend={(props) => (
               <Send {...props}>
                 <View
@@ -155,7 +184,7 @@ export default function RoomChat(props) {
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}>
-                  <Icon name="send" size={20} color="#fff"></Icon>
+                  <Icon name="send" size={20} color="#fff" />
                 </View>
               </Send>
             )}
@@ -164,7 +193,7 @@ export default function RoomChat(props) {
                 style={{alignSelf: 'center', left: 5}}
                 onPress={() => setIsVisibleAttach(true)}>
                 <View>
-                  <Icon name="note" size={30} color="#26a1c6"></Icon>
+                  <Icon name="note" size={30} color="#26a1c6" />
                 </View>
               </TouchableOpacity>
             )}>
@@ -184,15 +213,39 @@ export default function RoomChat(props) {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <View style={style.iconAttac}>
-                <Icon name="image" size={30} color="#fff"></Icon>
-              </View>
-              <View style={style.iconAttac}>
-                <Icon name="camera" size={30} color="#fff"></Icon>
-              </View>
-              <View style={style.iconAttac}>
-                <Icon name="pin" size={30} color="#fff"></Icon>
-              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsVisibleAttach(false);
+                  props.navigation.navigate('ActionsImage', {
+                    idRoom,
+                    type: 'photo',
+                  });
+                }}>
+                <View style={style.iconAttac}>
+                  <Icon name="image" size={30} color="#fff" />
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsVisibleAttach(false);
+                  props.navigation.navigate('ActionsImage', {
+                    idRoom,
+                    type: 'camera',
+                  });
+                }}>
+                <View style={style.iconAttac}>
+                  <Icon name="camera" size={30} color="#fff" />
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsVisibleAttach(false);
+                  props.navigation.navigate('ActionsMap', {idRoom});
+                }}>
+                <View style={style.iconAttac}>
+                  <Icon name="pin" size={30} color="#fff" />
+                </View>
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setIsVisibleAttach(false)}
                 style={{position: 'absolute', top: 5, left: 10}}>

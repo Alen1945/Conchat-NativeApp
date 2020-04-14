@@ -1,5 +1,10 @@
 import React from 'react';
-import {View, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
 import {
   Container,
   Content,
@@ -11,64 +16,59 @@ import {
   Text,
 } from 'native-base';
 import {Avatar, Overlay, Input} from 'react-native-elements';
-import {auth, db, firestore} from '../../config/firebase';
+import {auth, firestore} from '../../config/firebase';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {useSelector, useDispatch} from 'react-redux';
+import {addListChat} from '../../store/actions/listChatData';
 export default function Home(props) {
-  const [listChat, setListChat] = React.useState({});
+  const listChat = useSelector((state) => state.listChatData || {});
   const [isVisibleOverlay, setIsVisibleOverlay] = React.useState(false);
   const [listContact, setListContact] = React.useState([]);
-  const getIdListChat = async () => {
+  const dispatch = useDispatch();
+  const getListChat = () => {
     try {
       firestore
-        .collection('Users')
-        .doc(`${auth.currentUser.uid}`)
-        .collection('ListChat')
-        .onSnapshot((snapshot) => {
-          setIdListChat(
-            snapshot.docs.reduce((list, data) => [...list, data.data().id], []),
-          );
-        });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const getListChat = async () => {
-    try {
-      await firestore
         .collection('RoomChat')
         .where(`member.${auth.currentUser.uid}`, '==', true)
         .onSnapshot((rooms) => {
           if (rooms) {
-            rooms.docs.forEach(async (room) => {
+            rooms.docs.reduce((allRoom, room) => {
               const roomData = room.data();
-              if (roomData.type === 'DIRECT_MESSAGE') {
-                const idAnotherUser = Object.keys(roomData.member).filter(
-                  (v) => v !== auth.currentUser.uid,
-                )[0];
-                await firestore
-                  .collection('Users')
-                  .doc(idAnotherUser)
-                  .onSnapshot((data) => {
-                    const dataVal = data.data();
-                    if (dataVal) {
-                      setListChat((prevState) => ({
-                        ...prevState,
-                        [room.id]: {
-                          ...roomData,
-                          titleRoom: dataVal.displayName || dataVal.phoneNumber,
-                          secondUser: idAnotherUser,
-                          iconRoom: dataVal.photoURL || '',
-                        },
-                      }));
-                    }
-                  });
-              } else {
-                setListChat((prevState) => ({
-                  ...prevState,
-                  [room.id]: roomData,
-                }));
+              if (roomData.lastAddedMessage) {
+                if (roomData.type === 'DIRECT_MESSAGE') {
+                  const idAnotherUser = Object.keys(roomData.member).filter(
+                    (v) => v !== auth.currentUser.uid,
+                  )[0];
+                  firestore
+                    .collection('Users')
+                    .doc(idAnotherUser)
+                    .onSnapshot((data) => {
+                      const dataVal = data.data();
+                      if (dataVal) {
+                        dispatch(
+                          addListChat({
+                            ...allRoom,
+                            [room.id]: {
+                              ...roomData,
+                              titleRoom:
+                                dataVal.displayName || dataVal.phoneNumber,
+                              secondUser: idAnotherUser,
+                              iconRoom: dataVal.photoURL || '',
+                            },
+                          }),
+                        );
+                      }
+                    });
+                } else {
+                  dispatch(
+                    addListChat({
+                      ...allRoom,
+                      [room.id]: roomData,
+                    }),
+                  );
+                }
               }
-            });
+            }, {});
           }
         });
     } catch (err) {
@@ -85,14 +85,23 @@ export default function Home(props) {
           .limit(30)
           .get();
         if (searchResult.docs) {
-          searchResult.docs.forEach((user) => (data[user.id] = user.data()));
-          console.log(data);
+          searchResult.docs.forEach((user) => {
+            if (user.id === auth.currentUser.uid) {
+              return (data[user.id] = {...user.data(), displayName: 'You'});
+            }
+            return (data[user.id] = user.data());
+          });
           setListContact(data);
         }
       } else if (name.length === 0) {
         const searchResult = await firestore.collection('Users').get();
         if (searchResult.docs) {
-          searchResult.docs.forEach((user) => (data[user.id] = user.data()));
+          searchResult.docs.forEach((user) => {
+            if (user.id === auth.currentUser.uid) {
+              return (data[user.id] = {...user.data(), displayName: 'You'});
+            }
+            return (data[user.id] = user.data());
+          });
           setListContact(data);
         }
       }
@@ -141,6 +150,8 @@ export default function Home(props) {
                         {room.lastMessage &&
                           room.lastMessage.length > 15 &&
                           '...'}
+                        {!room.lastMessage && room.location && 'Location'}
+                        {!room.lastMessage && room.image && 'Image'}
                       </Text>
                     </Body>
                     <Right>
@@ -153,6 +164,24 @@ export default function Home(props) {
                   </ListItem>
                 );
               })}
+            {!(Object.keys(listChat).length > 0) && (
+              <View
+                style={{
+                  height: 200,
+                  width: 200,
+                  marginTop: 100,
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}>
+                <ImageBackground
+                  source={require('../../assets/empty.png')}
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                  }}
+                />
+              </View>
+            )}
           </List>
         </Content>
         <View style={style.containerAddChat}>

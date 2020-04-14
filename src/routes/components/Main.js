@@ -4,7 +4,7 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Home from '../../screens/Home/Home';
 import Profile from '../../screens/Profile/Profile';
-import Maps from '../../screens/Maps/Maps';
+
 const Tab = createMaterialTopTabNavigator();
 
 export default function TopupNavigate() {

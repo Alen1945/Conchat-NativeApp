@@ -7,7 +7,6 @@ import {startLoading, endLoading} from '../../store/actions/loading';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomInputText from '../../components/CustomInputText';
-import firebase from '@react-native-firebase/app';
 import {auth} from '../../config/firebase';
 import {useNavigation} from '@react-navigation/native';
 import CustomAlert from '../../components/CustomAlert';

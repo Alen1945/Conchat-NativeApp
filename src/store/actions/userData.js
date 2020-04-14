@@ -3,6 +3,8 @@ import {
   USER_LOGOUT,
   UPDATE_PROFILE,
   USER_CHANGE_PASSWORD,
+  REMOVE_LIST_CHAT,
+  REMOVE_DATA_CHAT,
 } from './actionTypes';
 import {
   db,
@@ -59,6 +61,12 @@ export const userLogout = () => async (dispatch) => {
     if (resultUpdate) {
       await dispatch({
         type: USER_LOGOUT,
+      });
+      dispatch({
+        type: REMOVE_LIST_CHAT,
+      });
+      dispatch({
+        type: REMOVE_DATA_CHAT,
       });
     }
   } catch (err) {

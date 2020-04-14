@@ -4,3 +4,7 @@ export const USER_LOGIN = 'USER_LOGIN';
 export const USER_LOGOUT = 'USER_LOGOUT';
 export const USER_CHANGE_PASSWORD = 'USER_CHANGE_PASSWORD';
 export const UPDATE_PROFILE = 'UPDATE_PROFILE';
+export const ADD_DATA_CHAT = 'ADD_DATA_CHAT';
+export const ADD_LIST_CHAT = 'ADD_LIST_CHAT';
+export const REMOVE_LIST_CHAT = 'REMOVE_LIST_CHAT';
+export const REMOVE_DATA_CHAT = 'REMOVE_DATA_CHAT';
