@@ -1,0 +1,10 @@
+import firebase from '@react-native-firebase/app';
+import Storage from '@react-native-firebase/storage';
+import Auth from '@react-native-firebase/auth';
+import Firestore from '@react-native-firebase/firestore';
+import FirebaseFunction from '@react-native-firebase/functions';
+const auth = Auth();
+const storage = Storage();
+const firestore = Firestore();
+const firebaseFunction = FirebaseFunction();
+export {auth, storage, firestore, firebaseFunction, firebase};
